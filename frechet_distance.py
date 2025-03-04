@@ -10,9 +10,43 @@ import models.dcgan_128 as dcgan_128_models
 import models.vgg_64 as vgg_models
 import models.vgg_128 as vgg_128_models
 import utils
+import importlib.resources
+import pathlib
 
 # Global cache for loaded models
 _MODEL_CACHE = {}
+
+# Function to get the path to a resource file
+def get_resource_path(resource_name):
+    """
+    Get the path to a resource file in the package.
+    
+    Args:
+        resource_name (str): Name of the resource file
+        
+    Returns:
+        str: Path to the resource file
+    """
+    # First try to find the file in the package resources
+    try:
+        # For Python 3.9+
+        with importlib.resources.files('mmnist_fd') as pkg_dir:
+            resource_path = pkg_dir / resource_name
+            if resource_path.exists():
+                return str(resource_path)
+    except (ImportError, AttributeError):
+        # Fallback for older Python versions
+        try:
+            return str(importlib.resources.path('mmnist_fd', resource_name))
+        except (ImportError, FileNotFoundError):
+            pass
+    
+    # If not found in package resources, try relative path
+    if os.path.exists(resource_name):
+        return resource_name
+    
+    # If still not found, return the original path and hope for the best
+    return resource_name
 
 
 def calculate_frechet_distance(mu1, sigma1, mu2, sigma2, eps=1e-6):
@@ -200,8 +234,11 @@ def frechet_distance(images1, images2, model_path='pretrained_models/svglp_smmni
     Returns:
         float: Fréchet distance between the two sets of images
     """
+    # Get the actual path to the model file
+    actual_model_path = get_resource_path(model_path)
+    
     # Load the model
-    encoder, _, _, _, _, opt = load_mmnist_model(model_path, device)
+    encoder, _, _, _, _, opt = load_mmnist_model(actual_model_path, device)
     
     # Preprocess images
     images1 = preprocess_images(images1, opt, device)

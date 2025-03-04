@@ -3,7 +3,7 @@ name = "mmnist-fd"
 version = "0.1.0"
 description = "Compute the Fréchet distance between two sets of (Stochastic) Moving MNIST images"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 dependencies = [
     "matplotlib>=3.10.1",
     "numpy>=2.2.3",
@@ -15,8 +15,12 @@ dependencies = [
     "torchvision>=0.21.0",
 ]
 
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [tool.setuptools]
-packages = ["mmnist_fd"]
+packages = ["."]
 
 [tool.setuptools.package-data]
-mmnist_fd = ["pretrained_models/*.pth"]
+"." = ["pretrained_models/*.pth"]

@@ -43,3 +43,82 @@ To train the SVG-FP model on 64x64 KTH videos run:
 ```
 python train_svg_fp.py --dataset kth --image_width  64 --model vgg --g_dim 128 --z_dim 24 --beta 0.000001 --n_past 10 --n_future 10 --channels 1 --lr 0.0008 --data_root /path/to/data/ --log_dir /logs/will/be/saved/here/
 ```
+
+## Fréchet Distance Calculation
+This repository includes functionality to calculate the Fréchet distance between two sets of images using the encoder part of the pretrained MMNIST model. The Fréchet distance is a measure of similarity between two distributions and is commonly used to evaluate the quality of generated images.
+
+### Usage
+You can calculate the Fréchet distance between two sets of images by importing the `frechet_distance` function from `frechet_distance.py`:
+
+```python
+import torch
+from frechet_distance import frechet_distance
+
+# Load your image sets (as torch.Tensor with shape [batch_size, channels, height, width])
+# Images can be in range [0, 1] or [0, 255]
+images1 = torch.load('path/to/first/image/set.pt')
+images2 = torch.load('path/to/second/image/set.pt')
+
+# Calculate Fréchet distance
+distance = frechet_distance(
+    images1, 
+    images2, 
+    model_path='pretrained_models/svglp_smmnist2.pth',  # Path to pretrained model
+    device='cuda' if torch.cuda.is_available() else 'cpu'  # Device to run on
+)
+
+print(f"Fréchet distance: {distance}")
+```
+
+The function automatically handles:
+- Loading the pretrained MMNIST model
+- Preprocessing the images (resizing, normalizing, etc.)
+- Encoding the images using the model's encoder
+- Calculating the statistics (mean and covariance) of the encoded features
+- Computing the Fréchet distance between the two distributions
+
+### Model Caching
+
+The implementation includes a caching mechanism that stores loaded models in memory. This means that if you call the `frechet_distance` function multiple times with the same model path and device, the model will only be loaded once, which significantly improves performance for repeated calculations.
+
+If you need to free up memory, you can clear the model cache:
+
+```python
+from frechet_distance import clear_model_cache
+
+# Calculate distances with multiple calls (model is loaded only once)
+distance1 = frechet_distance(images1, images2)
+distance2 = frechet_distance(images3, images4)  # Uses cached model
+
+# Clear the cache when done to free memory
+clear_model_cache()
+```
+
+### Examples
+
+#### Basic Example
+A simple example is included at the end of `frechet_distance.py` and can be run directly:
+
+```
+python frechet_distance.py
+```
+
+This will generate two random sets of images and calculate the Fréchet distance between them.
+
+#### Moving MNIST Example
+A more comprehensive example using the Moving MNIST dataset is provided in `example_frechet_distance.py`:
+
+```
+python example_frechet_distance.py
+```
+
+This script:
+1. Loads the Moving MNIST dataset (the same dataset used for training the model)
+2. Extracts the first and last frames from each sequence
+3. Calculates the Fréchet distance between these two sets of frames
+4. Creates a noisy version of the first frames and calculates the Fréchet distance between the original and noisy frames
+5. Visualizes examples from each set and saves them to `frechet_distance_example.png`
+6. Tests different noise levels and plots the relationship between noise level and Fréchet distance, saving the results to `frechet_distance_vs_noise.png`
+7. Compares frames from different time steps in the sequences and plots the relationship between time difference and Fréchet distance, saving the results to `frechet_distance_vs_time.png`
+
+This example demonstrates how the Fréchet distance increases as the distributions become more dissimilar, both when adding noise and when comparing frames that are temporally further apart in the sequences.

@@ -4,8 +4,8 @@ import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
-from frechet_distance import frechet_distance
-from data.moving_mnist import MovingMNIST
+from mmnist_fd.frechet_distance import frechet_distance
+from mmnist_fd.data.moving_mnist import MovingMNIST
 
 def main():
     # Set device

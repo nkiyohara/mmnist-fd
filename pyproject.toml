@@ -1,5 +1,5 @@
 [project]
-name = "mmnist-fd"
+name = "mmnist_fd"
 version = "0.1.0"
 description = "Compute the Fréchet distance between two sets of (Stochastic) Moving MNIST images"
 readme = "README.md"

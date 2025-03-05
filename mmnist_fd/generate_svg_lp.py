@@ -6,7 +6,7 @@ import os
 import random
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
-import utils
+from mmnist_fd import utils
 import itertools
 import progressbar
 import numpy as np

@@ -4,14 +4,11 @@ import torch.nn.functional as F
 import numpy as np
 import os
 from scipy import linalg
-import models.lstm as lstm_models
-import models.dcgan_64 as dcgan_models
-import models.dcgan_128 as dcgan_128_models
-import models.vgg_64 as vgg_models
-import models.vgg_128 as vgg_128_models
-import utils
+from mmnist_fd import utils
+from mmnist_fd import models
 import importlib.resources
 import pathlib
+import sys
 
 # Global cache for loaded models
 _MODEL_CACHE = {}
@@ -109,8 +106,15 @@ def load_mmnist_model(model_path='pretrained_models/svglp_smmnist2.pth', device=
         print("CUDA not available, using CPU instead.")
         device = 'cpu'
     
+    # 古いモジュール構造を新しい構造にマッピング
+    # 'models'モジュールを'mmnist_fd.models'にマッピング
+    sys.modules['models'] = sys.modules['mmnist_fd.models']
+    
     # Load the pretrained model with weights_only=False to handle older model files
     saved_model = torch.load(model_path, map_location=torch.device(device), weights_only=False)
+    
+    # マッピングを削除（オプション）
+    # del sys.modules['models']
     
     # Extract model components
     frame_predictor = saved_model['frame_predictor']

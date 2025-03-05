@@ -1,5 +1,5 @@
 [project]
-name = "mmnist_fd"
+name = "mmnist-fd"
 version = "0.1.0"
 description = "Compute the Fréchet distance between two sets of (Stochastic) Moving MNIST images"
 readme = "README.md"
@@ -24,4 +24,4 @@ packages = {find = {}}
 include-package-data = true
 
 [tool.setuptools.package-data]
-"*" = ["pretrained_models/*.pth"]
+"mmnist_fd" = ["pretrained_models/*.pth"]

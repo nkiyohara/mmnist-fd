@@ -3,7 +3,7 @@ name = "svg-mmnist-fd"
 version = "0.1.0"
 description = "Compute the Fréchet distance between two sets of (Stochastic) Moving MNIST images"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "matplotlib>=3.5.0",
     "numpy>=1.20.0",

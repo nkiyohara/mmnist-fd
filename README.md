@@ -10,6 +10,8 @@ You can install this package directly from GitHub:
 pip install git+https://github.com/nkiyohara/svg-mmnist-fd.git
 ```
 
+This package requires Python 3.9 or later.
+
 ## Usage
 
 The package provides a simple interface for calculating the Fréchet distance between two sets of Moving MNIST images:

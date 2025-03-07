@@ -4,19 +4,10 @@ This package is a fork of [edenton/svg](https://github.com/edenton/svg) (Stochas
 
 ## Installation
 
-You can install this package directly from the source:
+You can install this package directly from GitHub:
 
 ```bash
-# Install in development mode (editable)
-pip install -e .
-
-# Or install normally
-pip install .
-
-# Or build and install
-pip install build
-python -m build
-pip install dist/svg-mmnist-fd-0.1.0-py3-none-any.whl
+pip install git+https://github.com/nkiyohara/svg-mmnist-fd.git
 ```
 
 ## Usage

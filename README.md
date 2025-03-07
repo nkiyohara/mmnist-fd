@@ -1,4 +1,4 @@
-# MMNIST-FD: Fréchet Distance Calculator for Moving MNIST
+# SVG-MMNIST-FD: Fréchet Distance Calculator for Moving MNIST
 
 This package is a fork of [edenton/svg](https://github.com/edenton/svg) (Stochastic Video Generation with a Learned Prior), modified to provide a simple interface for calculating Fréchet distances between sets of Moving MNIST images.
 
@@ -57,6 +57,15 @@ The Fréchet distance is calculated by:
 3. Calculating the Fréchet distance between the two distributions
 
 This metric is useful for evaluating the quality and diversity of generated images compared to real images.
+
+### Important Note on Model Architecture
+
+The SVG-LP model used for feature extraction employs an autoencoder architecture with skip connections. This architectural choice has important implications for the Fréchet distance calculation:
+
+- **Dynamics Representation**: The latent space effectively captures and represents the dynamic aspects of the Moving MNIST sequences, such as digit movement patterns and trajectories.
+- **Fine-grained Visual Details**: Due to the skip connections in the autoencoder, certain fine-grained visual details (such as exact pixel-level information or minor texture variations) may bypass the latent space encoding. These details might not be fully reflected in the calculated Fréchet distance.
+
+As a result, the Fréchet distance computed using this model is particularly sensitive to differences in motion dynamics and overall structural patterns, but may be less sensitive to subtle pixel-level differences. This characteristic should be considered when interpreting the results, especially when comparing visually similar sequences with different dynamic properties or vice versa.
 
 ## Citation
 

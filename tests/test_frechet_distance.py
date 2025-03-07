@@ -8,10 +8,10 @@ from svg_mmnist_fd import frechet_distance
 
 def test_frechet_distance_function():
     """Test that the frechet_distance function works correctly with dummy data."""
-    # Create small dummy tensors for testing
-    # Using small tensors (2x1x8x8) to make the test run quickly
-    images1 = torch.randn(2, 1, 8, 8)
-    images2 = torch.randn(2, 1, 8, 8)
+    # Create dummy tensors with correct Moving MNIST dimensions (batch_size x 1 x 64 x 64)
+    # Using a larger batch size of 64 as requested
+    images1 = torch.randn(64, 1, 64, 64)
+    images2 = torch.randn(64, 1, 64, 64)
     
     # Test with CPU to ensure it works in CI environment
     try:

@@ -16,7 +16,7 @@ pip install .
 # Or build and install
 pip install build
 python -m build
-pip install dist/mmnist-fd-0.1.0-py3-none-any.whl
+pip install dist/svg-mmnist-fd-0.1.0-py3-none-any.whl
 ```
 
 ## Usage
@@ -25,7 +25,7 @@ The package provides a simple interface for calculating the Fréchet distance be
 
 ```python
 import torch
-from mmnist_fd import frechet_distance
+from svg_mmnist_fd import frechet_distance
 
 # Load your image tensors
 # images1 and images2 should be torch tensors with shape [batch_size, channels, height, width]

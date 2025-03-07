@@ -26,11 +26,11 @@ def get_resource_path(resource_name):
     """
     # First try to find the file in the package resources
     try:
-        # For Python 3.9+
-        with importlib.resources.files('svg_mmnist_fd') as pkg_dir:
-            resource_path = pkg_dir / resource_name
-            if resource_path.exists():
-                return str(resource_path)
+        # For Python 3.9+ (compatible with Python 3.13+)
+        pkg_dir = importlib.resources.files('svg_mmnist_fd')
+        resource_path = pkg_dir / resource_name
+        if resource_path.exists():
+            return str(resource_path)
     except (ImportError, AttributeError):
         # Fallback for older Python versions
         try:

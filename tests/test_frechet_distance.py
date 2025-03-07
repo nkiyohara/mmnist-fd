@@ -4,6 +4,7 @@ Test the frechet_distance function.
 
 import torch
 import pytest
+import numpy as np
 from svg_mmnist_fd import frechet_distance
 
 def test_frechet_distance_function():
@@ -19,8 +20,8 @@ def test_frechet_distance_function():
         # The actual value isn't important for this basic test
         fd = frechet_distance(images1, images2, device='cpu')
         
-        # Check that the result is a scalar tensor or float
-        assert isinstance(fd, (float, torch.Tensor))
+        # Check that the result is a scalar tensor, float, or numpy float type
+        assert isinstance(fd, (float, torch.Tensor, np.floating))
         
         # If it's a tensor, it should be a scalar (0-dimensional)
         if isinstance(fd, torch.Tensor):

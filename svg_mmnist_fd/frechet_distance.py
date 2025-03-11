@@ -225,6 +225,100 @@ def calculate_statistics(features):
     return mu, sigma
 
 
+class FrechetDistanceCalculator:
+    """
+    A class for calculating Fréchet distances between sets of Moving MNIST images.
+    The model is loaded once during initialization for efficiency.
+    """
+    
+    def __init__(self, model_path='pretrained_models/svglp_smmnist2.pth', device='cuda'):
+        """
+        Initialize the Fréchet distance calculator.
+        
+        Args:
+            model_path (str): Path to the pretrained model
+            device (str): Device to load the model on ('cuda' or 'cpu')
+        """
+        # Get the actual path to the model file
+        self.model_path = get_resource_path(model_path)
+        self.device = device
+        
+        if not torch.cuda.is_available() and device == 'cuda':
+            print("CUDA not available, using CPU instead.")
+            self.device = 'cpu'
+        
+        # Load the model once during initialization
+        self.encoder, _, _, _, _, self.opt = load_mmnist_model(self.model_path, self.device)
+        print(f"Model loaded from {self.model_path} to {self.device}")
+    
+    def preprocess_images(self, images):
+        """
+        Preprocess images to be compatible with the MMNIST model.
+        
+        Args:
+            images (torch.Tensor): Images to preprocess, shape [batch_size, channels, height, width]
+            
+        Returns:
+            torch.Tensor: Preprocessed images
+        """
+        return preprocess_images(images, self.opt, self.device)
+    
+    def encode_images(self, images):
+        """
+        Encode images using the encoder part of the MMNIST model.
+        
+        Args:
+            images (torch.Tensor): Images to encode, shape [batch_size, channels, height, width]
+            
+        Returns:
+            torch.Tensor: Encoded features, shape [batch_size, feature_dim]
+        """
+        return encode_images(images, self.encoder, self.device)
+    
+    def calculate_statistics(self, features):
+        """
+        Calculate mean and covariance statistics of features.
+        
+        Args:
+            features (torch.Tensor): Features to calculate statistics for, shape [batch_size, feature_dim]
+            
+        Returns:
+            tuple: (mean, covariance)
+        """
+        return calculate_statistics(features)
+    
+    def __call__(self, images1, images2):
+        """
+        Calculate the Fréchet distance between two sets of images.
+        
+        Args:
+            images1 (torch.Tensor): First set of images, shape [batch_size, channels, height, width]
+            images2 (torch.Tensor): Second set of images, shape [batch_size, channels, height, width]
+            
+        Returns:
+            float: Fréchet distance between the two sets of images
+        """
+        # Preprocess images
+        images1 = self.preprocess_images(images1)
+        images2 = self.preprocess_images(images2)
+        
+        # Encode images
+        features1 = self.encode_images(images1)
+        features2 = self.encode_images(images2)
+        
+        # Calculate statistics
+        mu1, sigma1 = self.calculate_statistics(features1)
+        mu2, sigma2 = self.calculate_statistics(features2)
+        
+        # Calculate Fréchet distance
+        fid = calculate_frechet_distance(mu1, sigma1, mu2, sigma2)
+        
+        return fid
+
+
+# Global calculator instance for the function interface
+_GLOBAL_CALCULATOR = None
+
 def frechet_distance(images1, images2, model_path='pretrained_models/svglp_smmnist2.pth', device='cuda'):
     """
     Calculate the Fréchet distance between two sets of images using the MMNIST model's encoder.
@@ -238,36 +332,27 @@ def frechet_distance(images1, images2, model_path='pretrained_models/svglp_smmni
     Returns:
         float: Fréchet distance between the two sets of images
     """
+    global _GLOBAL_CALCULATOR
+    
     # Get the actual path to the model file
     actual_model_path = get_resource_path(model_path)
     
-    # Load the model
-    encoder, _, _, _, _, opt = load_mmnist_model(actual_model_path, device)
+    # Create or get the calculator with the specified model and device
+    calculator_key = f"{actual_model_path}_{device}"
+    if _GLOBAL_CALCULATOR is None or _GLOBAL_CALCULATOR.model_path != actual_model_path or _GLOBAL_CALCULATOR.device != device:
+        _GLOBAL_CALCULATOR = FrechetDistanceCalculator(actual_model_path, device)
     
-    # Preprocess images
-    images1 = preprocess_images(images1, opt, device)
-    images2 = preprocess_images(images2, opt, device)
-    
-    # Encode images
-    features1 = encode_images(images1, encoder, device)
-    features2 = encode_images(images2, encoder, device)
-    
-    # Calculate statistics
-    mu1, sigma1 = calculate_statistics(features1)
-    mu2, sigma2 = calculate_statistics(features2)
-    
-    # Calculate Fréchet distance
-    fid = calculate_frechet_distance(mu1, sigma1, mu2, sigma2)
-    
-    return fid
+    # Calculate the Fréchet distance
+    return _GLOBAL_CALCULATOR(images1, images2)
 
 
 def clear_model_cache():
     """
     Clear the model cache to free up memory.
     """
-    global _MODEL_CACHE
+    global _MODEL_CACHE, _GLOBAL_CALCULATOR
     _MODEL_CACHE = {}
+    _GLOBAL_CALCULATOR = None
     print("Model cache cleared.")
 
 
@@ -283,7 +368,8 @@ if __name__ == "__main__":
     images1 = torch.rand(batch_size, channels, height, width)
     images2 = torch.rand(batch_size, channels, height, width)
     
-    # Calculate Fréchet distance
+    # Example 1: Using the function interface (loads model once)
+    print("Using function interface:")
     distance = frechet_distance(images1, images2, device='cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Fréchet distance: {distance}")
     
@@ -291,6 +377,17 @@ if __name__ == "__main__":
     images3 = torch.rand(batch_size, channels, height, width)
     distance2 = frechet_distance(images1, images3, device='cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Fréchet distance (second call): {distance2}")
+    
+    # Example 2: Using the class interface (more efficient for multiple calculations)
+    print("\nUsing class interface:")
+    calculator = FrechetDistanceCalculator(device='cuda' if torch.cuda.is_available() else 'cpu')
+    
+    # Calculate distances using the same calculator instance
+    distance3 = calculator(images1, images2)
+    print(f"Fréchet distance (class): {distance3}")
+    
+    distance4 = calculator(images1, images3)
+    print(f"Fréchet distance (class, second call): {distance4}")
     
     # Clear cache if needed
     # clear_model_cache() 

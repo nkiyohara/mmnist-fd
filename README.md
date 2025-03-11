@@ -14,7 +14,9 @@ This package requires Python 3.9 or later.
 
 ## Usage
 
-The package provides a simple interface for calculating the Fréchet distance between two sets of Moving MNIST images:
+The package provides two interfaces for calculating the Fréchet distance between two sets of Moving MNIST images:
+
+### Function Interface
 
 ```python
 import torch
@@ -32,6 +34,34 @@ print(f"Fréchet distance: {fd}")
 
 # You can also specify a different model path or device
 # fd = frechet_distance(images1, images2, model_path='pretrained_models/svglp_smmnist2.pth', device='cpu')
+```
+
+### Class Interface (More Efficient for Multiple Calculations)
+
+For more efficient calculations, especially when computing multiple Fréchet distances, use the class-based interface which loads the model only once:
+
+```python
+import torch
+from svg_mmnist_fd import FrechetDistanceCalculator
+
+# Initialize the calculator (loads the model once)
+calculator = FrechetDistanceCalculator(
+    model_path='pretrained_models/svglp_smmnist2.pth',  # Optional, default value shown
+    device='cuda'  # Optional, use 'cpu' if CUDA is not available
+)
+
+# Load your image tensors
+images1 = torch.randn(100, 1, 64, 64)  # Replace with your actual images
+images2 = torch.randn(100, 1, 64, 64)  # Replace with your actual images
+images3 = torch.randn(100, 1, 64, 64)  # Another set of images
+
+# Calculate Fréchet distances efficiently (no need to reload the model)
+# The calculator instance can be called directly like a function
+fd1 = calculator(images1, images2)
+print(f"Fréchet distance 1: {fd1}")
+
+fd2 = calculator(images1, images3)
+print(f"Fréchet distance 2: {fd2}")
 ```
 
 ## Pretrained Models
